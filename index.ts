@@ -2,12 +2,11 @@
 // Imports
 import Server from './Server/server';
 import ROUTER from './Router/routers'
-import cors from 'cors'
 
 // Requires
 const BODYPARSER = require( 'body-parser' )
 const MONGOOSE = require('mongoose');
-
+const CORS = require('cors')
 // Server
 const SERVER = new Server()
 
@@ -17,7 +16,7 @@ SERVER.APP.use(BODYPARSER.urlencoded({extended:true}))
 SERVER.APP.use(BODYPARSER.json())
 
 // CORS
-SERVER.APP.use( cors({origin:true,credentials:true }) );
+SERVER.APP.use( CORS({origin:true,credentials:false }) );
 
 
 
