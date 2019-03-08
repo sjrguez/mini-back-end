@@ -7,6 +7,8 @@ var UsuarioSchema = Schema({
     nick:{type:String,required:[true,'El nick es requerido']},
     password:{type:String,required:[true,'El password es requerido']},
     tipo:{type:Number,required:[true,'el tipo de usuario es requerido']},
+    direccion:{type:String,required:false},
+    telefono:{type:Number,required:false},
     token:{type:Number,required:false},
     estado:{type:Number,required:false,default:1},
     fecha_creacion:{type:Date,required:false,default:new Date().getTime()},

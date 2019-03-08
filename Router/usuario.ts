@@ -20,7 +20,7 @@ const ERROR={
 // Mostrar usuarios
 ROUTER.get('/',(req:Request,res:Response)=>{
         
-    USUARIO.find({estado:1},{nombre:1,nick:1,tipo:1,token:1,estado:1})
+    USUARIO.find({estado:{$lt:3}})
             .exec((error:any,usuarioDB:Array<Object>)=>{
                 if(error){
                     ERROR.error.error = error
@@ -47,7 +47,9 @@ ROUTER.post('/',(req:Request,res:Response)=>{
             nombre:BODY.nombre,
             nick: BODY.nick,
             password: bcrypt.hashSync(BODY.password, 10),
-            tipo:BODY.tipo
+            tipo:BODY.tipo,
+            telefono:BODY.telefono,
+            direccion:BODY.direccion
         })
         
         usuario.save((error:any,usuarioGuardado:any)=>{
@@ -96,6 +98,9 @@ ROUTER.put('/:id',(req:Request,res:Response)=>{
         usuario.nombre = BODY.nombre
         usuario.nick = BODY.nick
         usuario.tipo = BODY.tipo
+        usuario.telefono = BODY.telefono
+        usuario.direccion = BODY.direccion
+        usuario.password = bcrypt.hashSync(BODY.password, 10) 
         usuario.fecha_modificado = new Date().getTime()
          usuario.save((error:any,usuarioDB:any)=>{
             if(error){
