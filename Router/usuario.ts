@@ -21,6 +21,7 @@ const ERROR={
 ROUTER.get('/',(req:Request,res:Response)=>{
         
     USUARIO.find({estado:{$lt:3}})
+            .sort({_id:-1})
             .exec((error:any,usuarioDB:Array<Object>)=>{
                 if(error){
                     ERROR.error.error = error
@@ -71,7 +72,7 @@ ROUTER.post('/',(req:Request,res:Response)=>{
 // Traer usuario
 ROUTER.get('/:id',(req:Request,res:Response)=>{
     const ID = req.params.id
-    FUNCIONES.verificarID(ID).then((usu:any)=>{
+    FUNCIONES.verificarID(ID,1).then((usu:any)=>{
         let usuario =  usu.usuarioDB
          usuario.password = ':)'
         res.json({
@@ -89,7 +90,7 @@ ROUTER.put('/:id',(req:Request,res:Response)=>{
     const ID = req.params.id
     const BODY = req.body
     let usuario:any
-    FUNCIONES.verificarID(ID).then((usu:any)=>{
+    FUNCIONES.verificarID(ID,2).then((usu:any)=>{
         
         const DATA={nick:BODY.nick,estado:1}
         usuario = usu.usuarioDB
@@ -100,6 +101,7 @@ ROUTER.put('/:id',(req:Request,res:Response)=>{
         usuario.tipo = BODY.tipo
         usuario.telefono = BODY.telefono
         usuario.direccion = BODY.direccion
+        usuario.estado = BODY.estado
         usuario.password = bcrypt.hashSync(BODY.password, 10) 
         usuario.fecha_modificado = new Date().getTime()
          usuario.save((error:any,usuarioDB:any)=>{
@@ -124,10 +126,10 @@ ROUTER.put('/:id',(req:Request,res:Response)=>{
 // Eliminar usuario
 ROUTER.delete('/:id',(req:Request,res:Response)=>{
     const ID = req.params.id
-    FUNCIONES.verificarID(ID).then((data:any)=>{
+    FUNCIONES.verificarID(ID,2).then((data:any)=>{
         const USU =  data.usuarioDB
             
-        USU.estado = 2
+        USU.estado = 3
         USU.fecha_eliminado = new Date().getTime()
         USU.save((error:any,usuarioDB:any)=>{
             if(error){
@@ -142,14 +144,14 @@ ROUTER.delete('/:id',(req:Request,res:Response)=>{
                 mensaje:'Se ha elimiando correctamente'
             })
         })
-    })
+    }).catch((error:any)=>FUNCIONES.Http_Error(res,error.codigo,error.error))
 })
 
 // Cmbiar password
 ROUTER.put('/cambiarPass/:id',(req:Request,res:Response)=>{
     const ID = req.params.id
     const PASS = req.body.password
-    FUNCIONES.verificarID(ID).then((usu:any)=>{
+    FUNCIONES.verificarID(ID,1).then((usu:any)=>{
         let usuario = usu.usuarioDB
         
         usuario.password =  bcrypt.hashSync(PASS, 10)
@@ -173,8 +175,11 @@ ROUTER.put('/cambiarPass/:id',(req:Request,res:Response)=>{
 // Buscar usuario
 ROUTER.post('/buscar',(req:Request,res:Response)=>{
         const BODY =  req.body
-        let nick = new RegExp(BODY.nick, 'i');
-        USUARIO.find({estado:1,$or:[{nick}]})
+        let nombre = {nombre:new RegExp(BODY.nombre, 'i'),estado:1};
+        console.log(nombre);
+        
+        USUARIO.find({$or:[nombre]})
+                .sort({_id:-1})
                 .exec((error:any,usuarioDB:Array<object>)=>{
                     if(error){
                         ERROR.error.error = error

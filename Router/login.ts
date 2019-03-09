@@ -11,7 +11,7 @@ const ERROR_MENSAJE = FUNCIONES.ERROR
 ROUTER.post('/',(req:Request,res:Response)=>{
     const BODY = req.body
     
-    USUARIO.findOne({estado:1,nick:BODY.nick})
+    USUARIO.findOne({nick:BODY.nick})
                 .exec((error:any,usuarioDB:any)=>{
                     ERROR_MENSAJE.error.error = null
                     ERROR_MENSAJE.error.mensaje = 'Usuario y/o contraseña incorrecto.'
@@ -28,8 +28,13 @@ ROUTER.post('/',(req:Request,res:Response)=>{
                         return FUNCIONES.Http_Error(res,ERROR_MENSAJE.codigo,ERROR_MENSAJE.error)
                     }
 
-                    if (usuarioDB.estado == 3 || usuarioDB.estado == 2) {
+                    if (usuarioDB.estado == 3) {
+                        ERROR_MENSAJE.codigo = 403
+                        return FUNCIONES.Http_Error(res,ERROR_MENSAJE.codigo,ERROR_MENSAJE.error)
+                    }
+                    if(usuarioDB.estado == 2) {
                         ERROR_MENSAJE.codigo = 401
+                        ERROR_MENSAJE.error.mensaje = 'Usuario desactivado.'
                         return FUNCIONES.Http_Error(res,ERROR_MENSAJE.codigo,ERROR_MENSAJE.error)
                     }
 

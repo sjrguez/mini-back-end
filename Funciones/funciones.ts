@@ -17,9 +17,9 @@ const ERROR={
 
 
 
- const verificarID = (id:any)=>{
+ const verificarID = (id:any,estado:any)=>{
     return new Promise((resolve,reject)=>{
-        USUARIO.findOne({estado:1,_id:id})
+        USUARIO.findOne({estado:{$lte:estado},_id:id})
                 .exec((error:any,usuarioDB:any)=>{
                     if(error){
                         ERROR.error.error = error
