@@ -1,8 +1,10 @@
-const USUARIO =  require('./usuario')
-const LOGIN =  require('./login')
+const USUARIO =  require('./usuario.router')
+const LOGIN =  require('./login.router')
+const TIPOUSUARIO =  require('./tipousuario.router')
 
 const ROUTER =  {
     USUARIO,
+    TIPOUSUARIO,
     LOGIN
 }
 

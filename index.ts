@@ -22,6 +22,7 @@ SERVER.APP.use( CORS({origin:true,credentials:false }) );
 
 // Rutas
 SERVER.APP.use('/usuario',ROUTER.USUARIO)
+SERVER.APP.use('/tipoUsuario',ROUTER.TIPOUSUARIO)
 SERVER.APP.use('/login',ROUTER.LOGIN)
 
 

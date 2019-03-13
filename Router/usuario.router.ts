@@ -41,9 +41,8 @@ ROUTER.get('/',(req:Request,res:Response)=>{
 ROUTER.post('/',(req:Request,res:Response)=>{
     const BODY  = req.body
     
-    FUNCIONES.VerificarCampos({nick:BODY.nick,estado:1})
+    FUNCIONES.VerificarCampos(USUARIO,{nick:BODY.nick,estado:1})
     .then(()=>{
-
         let usuario =  new USUARIO({
             nombre:BODY.nombre,
             nick: BODY.nick,
@@ -72,9 +71,15 @@ ROUTER.post('/',(req:Request,res:Response)=>{
 // Traer usuario
 ROUTER.get('/:id',(req:Request,res:Response)=>{
     const ID = req.params.id
-    FUNCIONES.verificarID(ID,1).then((usu:any)=>{
-        let usuario =  usu.usuarioDB
-         usuario.password = ':)'
+    FUNCIONES.verificarID(USUARIO,ID,1).then((usu:any)=>{
+        if(isNull(usu.modeloDB)){
+            ERROR.error.error = null
+            ERROR.error.mensaje = "No existe este usuario"
+            ERROR.codigo = 404
+            throw  ERROR
+        }
+        let usuario =  usu.modeloDB
+         usuario.password = ''
         res.json({
             ok:true,
             data:usuario
@@ -90,11 +95,16 @@ ROUTER.put('/:id',(req:Request,res:Response)=>{
     const ID = req.params.id
     const BODY = req.body
     let usuario:any
-    FUNCIONES.verificarID(ID,2).then((usu:any)=>{
-        
+    FUNCIONES.verificarID(USUARIO,ID,2).then((usu:any)=>{
+        if(isNull(usu.modeloDB)){
+            ERROR.error.error = null
+            ERROR.error.mensaje = "No existe este usuario"
+            ERROR.codigo = 404
+            throw  ERROR
+        }
         const DATA={nick:BODY.nick,estado:1}
-        usuario = usu.usuarioDB
-        return FUNCIONES.VerificarCampos(DATA,ID)        
+        usuario = usu.modeloDB
+        return FUNCIONES.VerificarCampos(USUARIO,DATA,ID)        
     }).then(()=>{
         usuario.nombre = BODY.nombre
         usuario.nick = BODY.nick
@@ -126,8 +136,14 @@ ROUTER.put('/:id',(req:Request,res:Response)=>{
 // Eliminar usuario
 ROUTER.delete('/:id',(req:Request,res:Response)=>{
     const ID = req.params.id
-    FUNCIONES.verificarID(ID,2).then((data:any)=>{
-        const USU =  data.usuarioDB
+    FUNCIONES.verificarID(USUARIO,ID,2).then((data:any)=>{
+        if(isNull(data.modeloDB)){
+            ERROR.error.error = null
+            ERROR.error.mensaje = "No existe este usuario"
+            ERROR.codigo = 404
+            throw  ERROR
+        }
+        const USU =  data.modeloDB
             
         USU.estado = 3
         USU.fecha_eliminado = new Date().getTime()
@@ -151,8 +167,14 @@ ROUTER.delete('/:id',(req:Request,res:Response)=>{
 ROUTER.put('/cambiarPass/:id',(req:Request,res:Response)=>{
     const ID = req.params.id
     const PASS = req.body.password
-    FUNCIONES.verificarID(ID,1).then((usu:any)=>{
-        let usuario = usu.usuarioDB
+    FUNCIONES.verificarID(USUARIO,ID,1).then((usu:any)=>{
+        if(isNull(usu.modeloDB)){
+            ERROR.error.error = null
+            ERROR.error.mensaje = "No existe este usuario"
+            ERROR.codigo = 404
+            throw  ERROR
+        }
+        let usuario = usu.modeloDB
         
         usuario.password =  bcrypt.hashSync(PASS, 10)
         usuario.save((error:any,usuarioDB:any)=>{
@@ -176,7 +198,6 @@ ROUTER.put('/cambiarPass/:id',(req:Request,res:Response)=>{
 ROUTER.post('/buscar',(req:Request,res:Response)=>{
         const BODY =  req.body
         let nombre = {nombre:new RegExp(BODY.nombre, 'i'),estado:1};
-        console.log(nombre);
         
         USUARIO.find({$or:[nombre]})
                 .sort({_id:-1})
