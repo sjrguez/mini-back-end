@@ -78,7 +78,7 @@ ROUTER.put('/:id',(req:Request,res:Response)=>{
             throw ERROR
          }
         tipo = data.modeloDB
-        return FUNCIONES.VerificarCampos({nombre:BODY.nombre,estado:1},ID)
+        return FUNCIONES.VerificarCampos(TIPOUSUARIO,{nombre:BODY.nombre,estado:1},ID)
     }).then(()=>{
         tipo.nombre = BODY.nombre
         tipo.fecha_modificado = new Date().getTime()
@@ -114,21 +114,30 @@ ROUTER.delete('/:id',(req:Request,res:Response)=>{
             throw  ERROR
         }
         
-        TIPOUSUARIO.findOne({_id:ID})
-        .exec((error:any,tipoDB:any)=>{
-            if(error){
-                ERROR.error.error = error
-                ERROR.error.mensaje = "Ha sucedido un error al eliminar tipo de usuario"
-                ERROR.codigo = 500
-                return FUNCIONES.Http_Error(res,ERROR.codigo,ERROR.error)
-            }
+        return FUNCIONES.verificarID(TIPOUSUARIO,ID,1)
+    }).then((tipoDB:any)=>{
+        tipoDB = tipoDB.modeloDB
+        if(isNull(tipoDB)){
+            
+            ERROR.error.error = null
+            ERROR.error.mensaje = "Este tipo de usuario no existe!"
+            ERROR.codigo = 404
+            throw  ERROR
+        }
             tipoDB.estado = 2
             tipoDB.fecha_eliminado = new Date().getTime()
-            res.status(200).json({
-                ok:true,
-                mensaje:'Se ha elimiado correctamente'
+            tipoDB.save((error:any,data:any)=>{
+                if(error){
+                    ERROR.error.error = error
+                    ERROR.error.mensaje = "Ha sucedido un error al eliminar tipo de usuarios!"
+                    ERROR.codigo = 500
+                   return FUNCIONES.Http_Error(res,ERROR.codigo,ERROR.error)
+                }
+                res.status(200).json({
+                    ok:true,
+                    mensaje:'Se ha elimiado correctamente'
+                })
             })
-        })
     }).catch((error:any)=>FUNCIONES.Http_Error(res,error.codigo,error.error))
 })
 
