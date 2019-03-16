@@ -22,6 +22,7 @@ ROUTER.get('/',(req:Request,res:Response)=>{
         
     USUARIO.find({estado:{$lt:3}})
             .sort({_id:-1})
+            .populate('tipo','nombre')
             .exec((error:any,usuarioDB:Array<Object>)=>{
                 if(error){
                     ERROR.error.error = error
@@ -201,6 +202,7 @@ ROUTER.post('/buscar',(req:Request,res:Response)=>{
         
         USUARIO.find({$or:[nombre]})
                 .sort({_id:-1})
+                .populate('tipo','nombre')
                 .exec((error:any,usuarioDB:Array<object>)=>{
                     if(error){
                         ERROR.error.error = error
