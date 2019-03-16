@@ -1,9 +1,11 @@
 import { Router, Request, Response, response } from 'express';
 import { isNull } from 'util';
+import { NextFunction } from 'connect';
 
 const ROUTER = Router()
 const USUARIO = require('../Modelos/usuario')
-const bcrypt = require('bcrypt');
+const BCRYPT = require('bcrypt');
+const AUTENTICAR = require('../Middleware/autentificacion')
 
 const FUNCIONES = require('../Funciones/funciones')
 
@@ -38,8 +40,11 @@ ROUTER.get('/',(req:Request,res:Response)=>{
             })
 })
 
+
+
+
 // Registrar usuario
-ROUTER.post('/',(req:Request,res:Response)=>{
+ROUTER.post('/',AUTENTICAR.verificaToken,(req:Request,res:Response)=>{
     const BODY  = req.body
     
     FUNCIONES.VerificarCampos(USUARIO,{nick:BODY.nick,estado:1})
@@ -47,7 +52,7 @@ ROUTER.post('/',(req:Request,res:Response)=>{
         let usuario =  new USUARIO({
             nombre:BODY.nombre,
             nick: BODY.nick,
-            password: bcrypt.hashSync(BODY.password, 10),
+            password: BCRYPT.hashSync(BODY.password, 10),
             tipo:BODY.tipo,
             telefono:BODY.telefono,
             direccion:BODY.direccion
@@ -70,7 +75,7 @@ ROUTER.post('/',(req:Request,res:Response)=>{
 })
 
 // Traer usuario
-ROUTER.get('/:id',(req:Request,res:Response)=>{
+ROUTER.get('/:id',AUTENTICAR.verificaToken,(req:Request,res:Response)=>{
     const ID = req.params.id
     FUNCIONES.verificarID(USUARIO,ID,1).then((usu:any)=>{
         if(isNull(usu.modeloDB)){
@@ -92,7 +97,7 @@ ROUTER.get('/:id',(req:Request,res:Response)=>{
 
 // Modificar usuario
 
-ROUTER.put('/:id',(req:Request,res:Response)=>{
+ROUTER.put('/:id',AUTENTICAR.verificaToken,(req:Request,res:Response)=>{
     const ID = req.params.id
     const BODY = req.body
     let usuario:any
@@ -113,7 +118,7 @@ ROUTER.put('/:id',(req:Request,res:Response)=>{
         usuario.telefono = BODY.telefono
         usuario.direccion = BODY.direccion
         usuario.estado = BODY.estado
-        usuario.password = bcrypt.hashSync(BODY.password, 10) 
+        usuario.password = BCRYPT.hashSync(BODY.password, 10) 
         usuario.fecha_modificado = new Date().getTime()
          usuario.save((error:any,usuarioDB:any)=>{
             if(error){
@@ -135,7 +140,7 @@ ROUTER.put('/:id',(req:Request,res:Response)=>{
 
 
 // Eliminar usuario
-ROUTER.delete('/:id',(req:Request,res:Response)=>{
+ROUTER.delete('/:id',AUTENTICAR.verificaToken,(req:Request,res:Response)=>{
     const ID = req.params.id
     FUNCIONES.verificarID(USUARIO,ID,2).then((data:any)=>{
         if(isNull(data.modeloDB)){
@@ -177,7 +182,7 @@ ROUTER.put('/cambiarPass/:id',(req:Request,res:Response)=>{
         }
         let usuario = usu.modeloDB
         
-        usuario.password =  bcrypt.hashSync(PASS, 10)
+        usuario.password =  BCRYPT.hashSync(PASS, 10)
         usuario.save((error:any,usuarioDB:any)=>{
             if(error){
                 ERROR.error.error = error
@@ -196,7 +201,7 @@ ROUTER.put('/cambiarPass/:id',(req:Request,res:Response)=>{
 
 
 // Buscar usuario
-ROUTER.post('/buscar',(req:Request,res:Response)=>{
+ROUTER.post('/buscar',AUTENTICAR.verificaToken,(req:Request,res:Response)=>{
         const BODY =  req.body
         let nombre = {nombre:new RegExp(BODY.nombre, 'i'),estado:1};
         

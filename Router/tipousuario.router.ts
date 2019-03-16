@@ -4,7 +4,7 @@ import { isNull } from 'util';
 const ROUTER = Router()
 const TIPOUSUARIO = require('../Modelos/tipousuario')
 const USUARIO = require('../Modelos/usuario')
-
+const AUTENTICAR = require('../Middleware/autentificacion')
 const FUNCIONES = require('../Funciones/funciones')
 
 // Objeto de error
@@ -38,7 +38,7 @@ ROUTER.get('/',(req:Request,res:Response)=>{
 
 
 // Registrar tipo de usuario
-ROUTER.post('/',(req:Request,res:Response)=>{
+ROUTER.post('/',AUTENTICAR.verificaToken,(req:Request,res:Response)=>{
     const BODY =  req.body
     FUNCIONES.VerificarCampos(TIPOUSUARIO,{nombre:BODY.nombre,estado:1})
     .then(()=>{
@@ -64,7 +64,7 @@ ROUTER.post('/',(req:Request,res:Response)=>{
 
 // Modificar tipo de usuario
 
-ROUTER.put('/:id',(req:Request,res:Response)=>{
+ROUTER.put('/:id',AUTENTICAR.verificaToken,(req:Request,res:Response)=>{
     const ID = req.params.id
     const BODY = req.body
     let tipo:any
@@ -103,7 +103,7 @@ ROUTER.put('/:id',(req:Request,res:Response)=>{
 
 // Eliminar tipo de usuario
 
-ROUTER.delete('/:id',(req:Request,res:Response)=>{
+ROUTER.delete('/:id',AUTENTICAR.verificaToken,(req:Request,res:Response)=>{
     const ID = req.params.id
     FUNCIONES.verificarID(USUARIO,ID,2)
     .then((data:any)=>{
@@ -144,7 +144,7 @@ ROUTER.delete('/:id',(req:Request,res:Response)=>{
 
 // Buscar tipo de usuario
 
-ROUTER.post('/buscar',(req:Request,res:Response)=>{
+ROUTER.post('/buscar',AUTENTICAR.verificaToken,(req:Request,res:Response)=>{
     const BODY = req.body
 
     const NOMBRE = {nombre:new RegExp(BODY.nombre, 'i'),estado:1};

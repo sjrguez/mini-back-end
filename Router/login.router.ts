@@ -4,6 +4,9 @@ import { isNull } from 'util';
 const ROUTER = Router()
 const USUARIO = require('../Modelos/usuario')
 const bcrypt = require('bcrypt');
+const JWT = require('jsonwebtoken')
+const SEED = require("../Config/config").SEED
+
 const FUNCIONES = require('../Funciones/funciones')
 const ERROR_MENSAJE = FUNCIONES.ERROR
 
@@ -29,7 +32,7 @@ ROUTER.post('/',(req:Request,res:Response)=>{
                     }
 
                     if (usuarioDB.estado == 3) {
-                        ERROR_MENSAJE.codigo = 403
+                        ERROR_MENSAJE.codigo = 401
                         return FUNCIONES.Http_Error(res,ERROR_MENSAJE.codigo,ERROR_MENSAJE.error)
                     }
                     if(usuarioDB.estado == 2) {
@@ -41,10 +44,13 @@ ROUTER.post('/',(req:Request,res:Response)=>{
                     if(!bcrypt.compareSync(BODY.password,usuarioDB.password)){
                         return FUNCIONES.Http_Error(res,ERROR_MENSAJE.codigo,ERROR_MENSAJE.error)
                     }
-
+                    
+                    usuarioDB.password = ":)"
+                    const TOKEN = JWT.sign({usuario:usuarioDB},SEED,{expiresIn:14400})
                     res.json({
                         ok:true,
-                        data:usuarioDB
+                        data:usuarioDB,
+                        token:TOKEN
                     })
 
                 })
