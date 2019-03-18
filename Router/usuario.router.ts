@@ -47,7 +47,7 @@ ROUTER.get('/',(req:Request,res:Response)=>{
 ROUTER.post('/',AUTENTICAR.verificaToken,(req:Request,res:Response)=>{
     const BODY  = req.body
     
-    FUNCIONES.VerificarCampos(USUARIO,{nick:BODY.nick,estado:1})
+    FUNCIONES.VerificarCampos(USUARIO,{nick:BODY.nick})
     .then(()=>{
         let usuario =  new USUARIO({
             nombre:BODY.nombre,

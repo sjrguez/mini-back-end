@@ -13,8 +13,6 @@ const ERROR_MENSAJE = FUNCIONES.ERROR
 
 ROUTER.post('/',(req:Request,res:Response)=>{
     const BODY = req.body
-    console.log(BODY);
-    
     USUARIO.findOne({nick:BODY.nick})
                 .exec((error:any,usuarioDB:any)=>{
                     ERROR_MENSAJE.error.error = null
